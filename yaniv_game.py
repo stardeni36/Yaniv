@@ -24,6 +24,24 @@ class PackOfCards:
         return cards_dictionary
 
 
+class Player:
+    def __init__(self, cards):
+        self.player_cards = cards
+
+    def drop_card(self):
+        print("these are your cards:")
+        print(self.player_cards)
+        # choose card index to drop it - TODO: allow multiple cards
+        index = int(input("please choose card index to drop: "))
+        dropped_card = self.player_cards.pop(index)
+        print("dropped cards: ", dropped_card)
+        print("these are your cards:")
+        print(self.player_cards)
+
+    def take_card(self):
+        # TODO take_last dropped
+        # TODO take from kupa
+        pass
 
 
 # class Game:
@@ -33,6 +51,8 @@ class PackOfCards:
 #     # the rest will be the kupa
 
 poc = PackOfCards()
-print(poc.distribute_cards_to_players(2))
+cards_dict = poc.distribute_cards_to_players(2)
+player = Player(cards_dict[0])
+player.drop_card()
 
 

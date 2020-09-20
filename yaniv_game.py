@@ -1,3 +1,4 @@
+from random import shuffle
 
 HEART = ['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂽', '🂾']
 LEAF = ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂭', '🂮']
@@ -10,12 +11,13 @@ class PackOfCards:
     def __init__(self):
         # define all cards in the pack
         # 52 cards + 2 jokers -> 54
-        all_cards = HEART + LEAF + DIAMOND + CLUBS + JOKERS
-        print(all_cards)
+        self.all_cards = self.shuffle_cards(HEART + LEAF + DIAMOND + CLUBS + JOKERS)
+        print(self.all_cards)
 
-    def permute(self):
-        # TODO: permute method for every game
-        pass
+    def shuffle_cards(self, cards):
+        # permute method for every game
+        shuffle(cards)
+        return cards
 
     def distribute_cards_to_players(self):
         pass

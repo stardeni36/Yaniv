@@ -1,2 +1,2 @@
 # Yaniv
-implementation of the Yaniv game for friday dinners apart
+implementation of the Yaniv game for Friday dinners apart

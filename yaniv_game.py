@@ -77,20 +77,39 @@ class Player:
         is_in_range = lambda x: x in range(len(self.hand.cards))
         if False in [is_in_range(index) for index in indices]:
             return False
-        # if multiple: check both cases
+
+        # if multiple: check both cases - same value or range of numbers with the same suit
         if len(indices) > 1:
             cards_to_check = [self.hand.cards[ind] for ind in indices]
+
             # check if they have the same value
             values_of_cards_to_check = [card.value for card in cards_to_check]
+            # all values are equal
             if len(set(values_of_cards_to_check)) == 1:
                 return True
-            # check if having the same suit and create a range
+            # 2 values, one is 0 (joker)
+            elif len(set(values_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
+                return True
+
+            # check if having the same suit and form a range
             suits_of_cards_to_check = [card.suit for card in cards_to_check]
             if len(set(suits_of_cards_to_check)) == 1:
                 sorted_values = sorted(values_of_cards_to_check)
                 should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]))
                 if sorted_values == should_be_equal_to:
                     return True
+                else:
+                    return False
+            elif len(set(suits_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
+                num_jokers = values_of_cards_to_check.count(0)
+                # check if jokers complete the range
+                values_without_jokers = [val for val in values_of_cards_to_check if val != 0]
+                sorted_values = sorted(values_without_jokers)
+                should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]))
+                if (len(should_be_equal_to) - len(sorted_values)) == num_jokers:
+                    return True
+                else:
+                    return False
             else:
                 return False
         return True

@@ -1,11 +1,5 @@
 from random import shuffle
-
-HEART = ['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂽', '🂾']
-LEAF = ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂭', '🂮']
-DIAMOND = ['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃍', '🃎']
-CLUBS = ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃝', '🃞']
-JOKERS = ['🃟', '🃟']
-ALL_CARDS = HEART + LEAF + DIAMOND + CLUBS + JOKERS
+from card import ALL_CARDS
 
 AMOUNT_ALL = None
 
@@ -18,7 +12,7 @@ class PackOfCards:
         if is_shuffle:
             shuffle(self.cards)
 
-    def distribute(self, amount=AMOUNT_ALL, destination):
+    def distribute(self, destination, amount=AMOUNT_ALL):
         if amount == AMOUNT_ALL:
             amount = len(self.cards)
         batch = self.cards[:amount]
@@ -53,14 +47,14 @@ class Game:
     # the rest will be the kupa
 
     def __init__(self):
-        deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
-        
+        self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
+
         player1 = Player()
         player2 = Player()
         self.players = [player1, player2]
         
-        for player in players:
-            deck.distribute(7, player.pack)
+        for player in self.players:
+            self.deck.distribute(player.pack, 7)
 
     def run(self):
         gameover = False

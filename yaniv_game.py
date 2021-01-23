@@ -56,6 +56,13 @@ class Player:
     def __init__(self):
         self.hand = PackOfCards()
 
+    def check_yaniv(self):
+        sum_of_hand = self.hand.sum_of_card_values()
+        if sum_of_hand <= 7:
+            return True
+        else:
+            return False
+
     def action(self, stack_top):
 
         # Start by sorting hand (for convenience)
@@ -65,15 +72,18 @@ class Player:
         print(self.hand)
         print("The top of the stack is: %s" % stack_top)
 
-        # Ask first action and validate input
-        valid_input = False
-        while not valid_input:
-            answer = input("Choose your action - (p)lay cards or call (y)aniv: ")
-            if answer == 'p' or answer == 'y':
-                valid_input = True
+        is_yaniv_possible = self.check_yaniv()
 
-        if answer == 'y':
-            return CALL_YANIV
+        if is_yaniv_possible:
+            # Ask first action and validate input
+            valid_input = False
+            while not valid_input:
+                answer = input("Choose your action - (p)lay cards or call (y)aniv: ")
+                if answer == 'p' or answer == 'y':
+                    valid_input = True
+
+            if answer == 'y':
+                return CALL_YANIV
         
         # Ask second action and validate input
         valid_input = False
@@ -137,24 +147,16 @@ class Game:
 
     def finish_game(self, curr_player):
         sum_to_compare_to = curr_player.hand.sum_of_card_values()
-        # other_players = # TODO
         # check other players packs
         for player in self.players:
-            if player != curr_player:# TODO: exclude current one
+            if player != curr_player: # exclude current one
                 if  player.hand.sum_of_card_values() < sum_to_compare_to:
                     return CALL_ASSAF
-
-    def check_yaniv(self, player):
-        sum_of_hand = player.hand.sum_of_card_values()
-        if sum_of_hand <= 7:
-            return True
-        else:
-            return False
 
     def turn(self, player):
         action = player.action(self.stack.cards[0])
         if action == CALL_YANIV:
-            if self.check_yaniv(player):
+            if player.check_yaniv():
                 self.finish_game(player)
             else:
                 print('Yaniv call not valid!')

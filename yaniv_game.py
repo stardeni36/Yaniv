@@ -126,14 +126,6 @@ class Player:
                     valid_input = True
             except ValueError:
                 pass  # Try again
-
-            # try:
-            #     indices = [int(val.strip()) for val in answer.split(',')]
-            #     is_valid = lambda x: x in range(len(self.hand.cards))
-            #     if False not in [is_valid(index) for index in indices]:
-            #         valid_input = True
-            # except ValueError:
-            #
         
         return indices
 
@@ -144,7 +136,6 @@ class Player:
                 return DECK
             if response == 'stack':
                 return STACK
-
 
 
 class Game:

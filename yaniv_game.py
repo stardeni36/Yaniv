@@ -91,27 +91,40 @@ class Player:
             elif len(set(values_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
                 return True
 
+            # Verify that all values (except jokers) are unique
+            values_without_jokers = [val for val in values_of_cards_to_check if val != 0]
+            if len(values_without_jokers) != len(set(values_without_jokers)):
+                return False
+
             # check if having the same suit and form a range
             suits_of_cards_to_check = [card.suit for card in cards_to_check]
-            if len(set(suits_of_cards_to_check)) == 1:
-                sorted_values = sorted(values_of_cards_to_check)
-                should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]))
-                if sorted_values == should_be_equal_to:
-                    return True
-                else:
-                    return False
-            elif len(set(suits_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
-                num_jokers = values_of_cards_to_check.count(0)
-                # check if jokers complete the range
-                values_without_jokers = [val for val in values_of_cards_to_check if val != 0]
-                sorted_values = sorted(values_without_jokers)
-                should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]))
-                if (len(should_be_equal_to) - len(sorted_values)) == num_jokers:
+            if len(set(suits_of_cards_to_check)) == 1 or (len(set(suits_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check)):
+                expected_length = max(values_of_cards_to_check) - min(values_of_cards_to_check) + 1
+                if expected_length >= 3 and (len(values_of_cards_to_check) == expected_length):
                     return True
                 else:
                     return False
             else:
                 return False
+            #
+            # suits_of_cards_to_check = [card.suit for card in cards_to_check]
+            # if len(set(suits_of_cards_to_check)) == 1:
+            #     if expected_length >= 3 and (len(values_of_cards_to_check) == expected_length):
+            #         return True
+            #     else:
+            #         return False
+            # elif len(set(suits_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
+            #     num_jokers = values_of_cards_to_check.count(0)
+            #     if expected_length >= 3 and (len(values_of_cards_to_check) == expected_length):
+            #     # check if jokers complete the range
+            #     sorted_values = sorted(values_without_jokers)
+            #     should_be_equal_to = list(range(sorted_values[0], sorted_values[-1] + 1))
+            #     if (len(should_be_equal_to) - len(sorted_values)) == num_jokers:
+            #         return True
+            #     else:
+            #         return False
+            # else:
+            #     return False
         return True
 
     def action(self, stack_top):

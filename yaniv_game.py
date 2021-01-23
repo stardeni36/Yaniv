@@ -40,10 +40,14 @@ class PackOfCards:
         self.cards = self.cards[amount:]
         destination.cards = batch + destination.cards
 
-    def distribute_by_indices(self, destination, indices):
+    def discard_batch(self, indices):
         batch = [self.cards[index] for index in indices]
         for card in batch:
             self.cards.remove(card)
+        return batch
+
+    def distribute_by_indices(self, destination, indices):
+        batch = self.discard_batch(indices)
         destination.cards = batch + destination.cards
 
     def sum_of_card_values(self):
@@ -158,11 +162,11 @@ class Game:
                 self.finish_game(player)
             else:
                 print('Yaniv call not valid!')
+        else:
+            batch = player.hand.discard_batch(action)
 
         self.draw(player)
-
-
-        pass
+        self.stack = batch + self.stack
 
 
 game = Game()

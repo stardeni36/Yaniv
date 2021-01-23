@@ -2,6 +2,8 @@ from random import shuffle
 from card import ALL_CARDS
 
 AMOUNT_ALL = None
+DECK = 0
+STACK = 1
 
 
 class PackOfCards:
@@ -34,10 +36,14 @@ class Player:
         print("these are your cards:")
         print(self.player_cards)
 
-    def take_card(self):
-        # TODO take_last dropped
-        # TODO take from kupa
-        pass
+    def choice_take_card(self):
+        while True:
+            response = input('take a card from the deck or the stack? ')
+            if response == 'deck':
+                return DECK
+            if response == 'stack':
+                return STACK
+
 
 
 class Game:
@@ -66,10 +72,10 @@ class Game:
             pass
 
     def draw(self, player):
-        response = input('take a card from the deck or the stack?')
-        if response == 'deck':
-            pass
-        elif response == 'stack':
+        response = player.choice_take_card()
+        if response == DECK:
+            self.deck.distribute(player.pack, 1)
+        elif response == STACK:
             self.stack.distribute(player.pack, 1)
 
     def turn(self, player):

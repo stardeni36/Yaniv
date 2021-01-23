@@ -123,10 +123,10 @@ class Game:
     def finish_game(self):
         # check other players packs
         for player in self.players: # exclude current one
-            sum([card.value for card in player.pack.cards])
+            sum([card.value for card in player.hand.cards])
 
     def check_yaniv(self, player):
-        if sum([card.value for card in player.pack.cards]) <= 7:
+        if sum([card.value for card in player.hand.cards]) <= 7:
             return True
         else:
             return False

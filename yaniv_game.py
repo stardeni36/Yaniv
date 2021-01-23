@@ -2,7 +2,8 @@ from random import shuffle
 from card import ALL_CARDS
 
 AMOUNT_ALL = None
-
+CALL_YANIV = 0
+CALL_ASSAF = 1
 
 class PackOfCards:
     def __init__(self, cards=None, is_shuffle=False):
@@ -24,11 +25,28 @@ class Player:
     def __init__(self):
         self.pack = PackOfCards()
 
-    def drop_card(self):
-        print("these are your cards:")
-        print(self.player_cards)
-        # choose card index to drop it - TODO: allow multiple cards
-        index = int(input("please choose card index to drop: "))
+    def action(self):
+        print("These are your cards:")
+        print(self.pack)
+
+        valid_input = False
+            while not valid_input:
+            answer = int(input("Choose your action - (p)lay cards or call (y)aniv: "))
+            if answer == 'p' or answer == 'y':
+                valid_input = True
+
+        if answer == 'y'
+            return CALL_YANIV
+        
+        valid_input = False
+        while not valid_input:
+            answer = int(input("Choose card indices to play, separated by commas: "))
+            splitted = answer.split(',')
+            try
+            if False not in [val.isnumeric() for val in splitted]:
+                valid_input = True
+        
+        indices = [int(splitted)]
         dropped_card = self.player_cards.pop(index)
         print("dropped cards: ", dropped_card)
         print("these are your cards:")
@@ -73,7 +91,7 @@ class Game:
             self.stack.distribute(player.pack, 1)
 
     def turn(self, player):
-        # TODO: drop cards
+        player.action(self.stack[0])
         self.draw(player)
         pass
 

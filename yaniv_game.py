@@ -93,6 +93,7 @@ class Player:
                     return True
             else:
                 return False
+        return True
 
     def action(self, stack_top):
 

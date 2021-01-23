@@ -1,6 +1,6 @@
 from random import shuffle
 from operator import itemgetter, attrgetter
-from card import ALL_CARDS
+from card import ALL_CARDS, VALUE_JOKER
 
 
 STARTING_HAND_SIZE = 7
@@ -44,6 +44,7 @@ class PackOfCards:
         batch = self.cards[:amount]
         self.cards = self.cards[amount:]
         destination.cards = batch + destination.cards
+        return batch
 
     def discard_batch(self, indices):
         batch = [self.cards[index] for index in indices]
@@ -78,53 +79,32 @@ class Player:
         if False in [is_in_range(index) for index in indices]:
             return False
 
-        # if multiple: check both cases - same value or range of numbers with the same suit
+        # Play of multiple cards in a single turn
         if len(indices) > 1:
             cards_to_check = [self.hand.cards[ind] for ind in indices]
-
-            # check if they have the same value
             values_of_cards_to_check = [card.value for card in cards_to_check]
-            # all values are equal
-            if len(set(values_of_cards_to_check)) == 1:
-                return True
-            # 2 values, one is 0 (joker)
-            elif len(set(values_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
-                return True
+            num_jokers = values_of_cards_to_check.count(VALUE_JOKER)
 
-            # Verify that all values (except jokers) are unique
-            values_without_jokers = [val for val in values_of_cards_to_check if val != 0]
-            if len(values_without_jokers) != len(set(values_without_jokers)):
+            # Check whether all the cards have the same value
+            if len(set(values_of_cards_to_check)) == 1 or \
+                (len(set(values_of_cards_to_check)) == 2 and num_jokers > 0):
+                return True
+            
+            # Check whether the cards form a streak (at least 3) of the same suit
+            if len(indices) < 3:
                 return False
-
-            # check if having the same suit and form a range
-            suits_of_cards_to_check = [card.suit for card in cards_to_check]
-            if len(set(suits_of_cards_to_check)) == 1 or (len(set(suits_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check)):
-                expected_length = max(values_of_cards_to_check) - min(values_of_cards_to_check) + 1
-                if expected_length >= 3 and (len(values_of_cards_to_check) == expected_length):
-                    return True
-                else:
+            cards_without_jokers = sorted([card for card in cards_to_check if card.value != VALUE_JOKER], key=attrgetter('value'))
+            prev_card = cards_without_jokers[0]
+            for card in cards_without_jokers[1:]:
+                if card.suit != prev_card.suit:
                     return False
-            else:
-                return False
-            #
-            # suits_of_cards_to_check = [card.suit for card in cards_to_check]
-            # if len(set(suits_of_cards_to_check)) == 1:
-            #     if expected_length >= 3 and (len(values_of_cards_to_check) == expected_length):
-            #         return True
-            #     else:
-            #         return False
-            # elif len(set(suits_of_cards_to_check)) == 2 and (0 in values_of_cards_to_check):
-            #     num_jokers = values_of_cards_to_check.count(0)
-            #     if expected_length >= 3 and (len(values_of_cards_to_check) == expected_length):
-            #     # check if jokers complete the range
-            #     sorted_values = sorted(values_without_jokers)
-            #     should_be_equal_to = list(range(sorted_values[0], sorted_values[-1] + 1))
-            #     if (len(should_be_equal_to) - len(sorted_values)) == num_jokers:
-            #         return True
-            #     else:
-            #         return False
-            # else:
-            #     return False
+                diff = card.value - prev_card.value
+                jokers_needed = diff - 1
+                if jokers_needed > num_jokers:
+                    return False
+                num_jokers -= jokers_needed
+                prev_card = card
+            
         return True
 
     def action(self, stack_top):
@@ -134,7 +114,7 @@ class Player:
 
         print("This is your hand:")
         print(self.hand)
-        print("The top of the stack is: %s" % stack_top)
+        print("The top of the stack is: %s ." % stack_top)
 
         is_yaniv_possible = self.check_yaniv()
 
@@ -173,13 +153,16 @@ class Player:
     def is_assaf(self):
         valid_input = False
         while not valid_input:
-            answer = input("Call (a)ssaf or (n)o?")
+            answer = input("Call (a)ssaf or (n)o? ")
             if answer == 'a' or answer == 'n':
                 valid_input = True
-
+    
         if answer == 'a':
             return True
         return False
+
+    def announce_acquisition(self, acquisition):
+        print('New card acquired: %s .' % acquisition)
 
 
 class Game:
@@ -203,10 +186,9 @@ class Game:
                 if self.turn(player):
                     print('%s called Yaniv!' % player.name)
                     winner = self.finish_game(yaniv=player)
-                    print('%s is the winner!' % winner.name)
+                    print('The winner is %s!' % winner.name)
                     gameover=True
                     break
-
 
     def repopulate_deck(self):
         card_inds_to_move = range(1, len(self.stack.cards))  # TODO: make sure the indices are ok
@@ -216,18 +198,19 @@ class Game:
     def draw(self, player):
         response = player.choice_take_card()
         if response == DECK:
-            self.deck.distribute(player.hand, 1)
+            acquisition = self.deck.distribute(player.hand, 1)
             if len(self.deck.cards) == 0:
                 self.repopulate_deck()
         elif response == STACK:
-            self.stack.distribute(player.hand, 1)
+            acquisition = self.stack.distribute(player.hand, 1)
         else:
             raise InputError('Invalid draw response!')
-        return response
+        player.announce_acquisition(acquisition[0])
+        return response, acquisition[0]
 
     def finish_game(self, yaniv):
         scores = [(player, player.hand.sum()) for player in self.players]
-        scores.sort(key=itemgetter[1])
+        scores.sort(key=itemgetter(1))
         yaniv_score = None
         for player, score in scores:
             if yaniv_score is not None and score > yaniv_score:
@@ -240,7 +223,7 @@ class Game:
         return yaniv
 
     def turn(self, player):
-        print("%s's turn" % player.name)
+        print("%s's turn." % player.name)
         action = player.action(self.stack.cards[0])
         
         if action == CALL_YANIV:
@@ -248,12 +231,16 @@ class Game:
             
         elif type(action) == list:
             batch = player.hand.discard_batch(action)
-            response = self.draw(player)
+            batch.sort(key=attrgetter('value'), reverse=True)
+            response, acquisition = self.draw(player)
             self.stack.cards = batch + self.stack.cards
 
             batch_nice = ' , '.join([str(card) for card in batch])
             print('%s dropped %s ,' % (player.name, batch_nice))
-            print('and took a card from the %s.' % response)
+            if response == DECK:
+                print('and took a card from the deck.')
+            if response == STACK:
+                print('and took the card %s  from the stack.' % str(acquisition))
 
         else:
             raise InputError('Invalid action!')

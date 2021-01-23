@@ -9,6 +9,7 @@ SUIT_LEAF = 1
 SUIT_DIAMOND = 2
 SUIT_CLUBS = 3
 SUIT_JOKER = 4
+VALUE_JOKER = 0
 
 class Card:
     def __init__(self, value, suit, graphic):
@@ -31,7 +32,7 @@ DIAMOND_CARDS = [Card(value, SUIT_DIAMOND, graphic) \
 CLUBS_CARDS =   [Card(value, SUIT_CLUBS, graphic) \
                 for value, graphic in enumerate(CLUBS_GRAPHIC, 1)]
 
-JOKER_CARDS =   [Card(0, SUIT_JOKER, graphic) \
+JOKER_CARDS =   [Card(VALUE_JOKER, SUIT_JOKER, graphic) \
                 for graphic  in JOKER_GRAPHIC]
 
 ALL_CARDS = HEART_CARDS + LEAF_CARDS + DIAMOND_CARDS + CLUBS_CARDS + JOKER_CARDS

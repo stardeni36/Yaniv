@@ -36,6 +36,11 @@ class PackOfCards:
             self.cards.remove(card)
         destination.cards = batch + destination.cards
 
+    def sum_of_card_values(self):
+        sum_of_values = sum([min(card.value, 10) for card in self.cards])
+        return sum_of_values
+
+
 
 class Player:
     def __init__(self):
@@ -107,7 +112,7 @@ class Game:
 
     def repopulate_deck(self):
         card_inds_to_move = range(1, len(self.stack.cards))  # TODO: make sure the indices are ok
-        self.stack.distributed_by_indices(self.deck, card_inds_to_move)
+        self.stack.distribute_by_indices(self.deck, card_inds_to_move)
         self.deck.shuffle_pack()
 
     def draw(self, player):
@@ -120,13 +125,18 @@ class Game:
         elif response == STACK:
             self.stack.distribute(player.hand, 1)
 
-    def finish_game(self):
+    def finish_game(self, curr_player):
+        sum_to_compare_to = curr_player.hand.sum_of_card_values()
+        # other_players = # TODO
         # check other players packs
-        for player in self.players: # exclude current one
-            sum([card.value for card in player.hand.cards])
+        for player in self.players:
+            if player != curr_player:# TODO: exclude current one
+                if  player.hand.sum_of_card_values() < sum_to_compare_to:
+                    return CALL_ASSAF
 
     def check_yaniv(self, player):
-        if sum([card.value for card in player.hand.cards]) <= 7:
+        sum_of_hand = player.hand.sum_of_card_values()
+        if sum_of_hand <= 7:
             return True
         else:
             return False
@@ -135,7 +145,9 @@ class Game:
         action = player.action(self.stack.cards[0])
         if action == CALL_YANIV:
             if self.check_yaniv(player):
-                self.finish_game()
+                self.finish_game(player)
+            else:
+                print('Yaniv call not valid!')
 
         self.draw(player)
 

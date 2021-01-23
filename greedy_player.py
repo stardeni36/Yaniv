@@ -1,7 +1,8 @@
+from time import sleep
+import random
 from operator import attrgetter
 from config import *
 from packofcards import PackOfCards
-import random
 
 
 class GreedyPlayer:
@@ -29,15 +30,16 @@ class GreedyPlayer:
         # Ask second action and validate input
         maximal_index = max(range(len(self.hand.cards)), key=lambda i: self.hand.cards[i].value)
         indices = [maximal_index]
+        sleep(2)
         return indices
 
     def choice_take_card(self):
-        while True:
-            random_number = random.random()
-            if random_number > 0.5:
-                return DECK
-            else:
-                return STACK
+        sleep(1)
+        random_number = random.random()
+        if random_number > 0.5:
+            return DECK
+        else:
+            return STACK
 
     def is_assaf(self):
         return True

@@ -1,4 +1,5 @@
 from operator import itemgetter, attrgetter
+from time import sleep
 from config import *
 from card import ALL_CARDS
 from packofcards import PackOfCards
@@ -14,7 +15,7 @@ class Game:
 
         player1 = Player("Stav")
         # player2 = Player("Eyal")
-        player2 = GreedyPlayer("greedy")
+        player2 = GreedyPlayer("Bot")
         self.players = [player1, player2]
         
         for player in self.players:
@@ -25,10 +26,13 @@ class Game:
         gameover = False
         while not gameover:
             for player in self.players:
+                sleep(1)
                 if self.turn(player):
                     print('%s called Yaniv!' % player.name)
-                    winner = self.finish_game(yaniv=player)
+                    winner, scores = self.finish_game(yaniv=player)
                     print('The winner is %s!' % winner.name)
+                    for player, score in scores:
+                        print('%s \t %d' % (player.name, score))
                     gameover=True
                     break
 
@@ -61,8 +65,8 @@ class Game:
                 yaniv_score = score
             elif player.is_assaf():
                 print('%s called Assaf!' % player.name)
-                return player
-        return yaniv
+                return player, scores
+        return yaniv, scores
 
     def turn(self, player):
         print("%s's turn." % player.name)
@@ -78,11 +82,13 @@ class Game:
             self.stack.cards = batch + self.stack.cards
 
             batch_nice = ' , '.join([str(card) for card in batch])
+            print()
             print('%s dropped %s ,' % (player.name, batch_nice))
             if response == DECK:
                 print('and took a card from the deck.')
             if response == STACK:
                 print('and took the card %s  from the stack.' % str(acquisition))
+            print()
 
         else:
             raise InputError('Invalid action!')

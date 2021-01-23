@@ -54,6 +54,7 @@ class Player:
 
         print("This is your hand:")
         print(self.hand)
+        print('Total value: %d' % self.hand.sum())
         print("The top of the stack is: %s ." % stack_top)
 
         is_yaniv_possible = self.check_yaniv()

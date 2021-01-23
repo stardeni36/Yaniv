@@ -5,28 +5,30 @@ LEAF = ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', 
 DIAMOND = ['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃍', '🃎']
 CLUBS = ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃝', '🃞']
 JOKERS = ['🃟', '🃟']
+ALL_CARDS = HEART + LEAF + DIAMOND + CLUBS + JOKERS
+
+AMOUNT_ALL = None
 
 
 class PackOfCards:
-    def __init__(self):
-        # define all cards in the pack
-        # 52 cards + 2 jokers -> 54
-        self.all_cards = HEART + LEAF + DIAMOND + CLUBS + JOKERS
-        shuffle(self.all_cards)
+    def __init__(self, cards=None, is_shuffle=False):
+        self.cards = []
+        if cards!=None:
+            self.cards = cards
+        if is_shuffle:
+            shuffle(self.cards)
 
-    def distribute_cards_to_players(self, player_num):
-        cards_dictionary = {}
-        for player_index in range(player_num):
-            player_cards = self.all_cards[player_index:player_index+7]
-            cards_dictionary[player_index] = player_cards
-        kupa = self.all_cards[player_num * 7:]
-        cards_dictionary['kupa'] = kupa
-        return cards_dictionary
+    def distribute(self, amount=AMOUNT_ALL, destination):
+        if amount == AMOUNT_ALL:
+            amount = len(self.cards)
+        batch = self.cards[:amount]
+        self.cards = self.cards[amount:]
+        destination.cards += batch
 
 
 class Player:
-    def __init__(self, cards):
-        self.player_cards = cards
+    def __init__(self):
+        self.pack = PackOfCards()
 
     def drop_card(self):
         print("these are your cards:")
@@ -44,15 +46,30 @@ class Player:
         pass
 
 
-# class Game:
-#     # TODO in init:
-#     # call PackOfCards and its permutation method
-#     # call its method for giving 7 cards to each player
-#     # the rest will be the kupa
+class Game:
+    # TODO in init:
+    # call PackOfCards and its permutation method
+    # call its method for giving 7 cards to each player
+    # the rest will be the kupa
 
-poc = PackOfCards()
-cards_dict = poc.distribute_cards_to_players(2)
-player = Player(cards_dict[0])
-player.drop_card()
+    def __init__(self):
+        deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
+        
+        player1 = Player()
+        player2 = Player()
+        self.players = [player1, player2]
+        
+        for player in players:
+            deck.distribute(7, player.pack)
 
+    def run(self):
+        gameover = False
+        while not gameover:
+            pass
+
+    def turn(self, player):
+        pass
+
+game = Game()
+game.run()
 

@@ -1,11 +1,5 @@
 from random import shuffle
-
-HEART = ['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂽', '🂾']
-LEAF = ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂭', '🂮']
-DIAMOND = ['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃍', '🃎']
-CLUBS = ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃝', '🃞']
-JOKERS = ['🃟', '🃟']
-ALL_CARDS = HEART + LEAF + DIAMOND + CLUBS + JOKERS
+from card import ALL_CARDS
 
 AMOUNT_ALL = None
 
@@ -55,7 +49,7 @@ class Game:
     def __init__(self):
         self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
         self.stack = PackOfCards()
-        
+
         player1 = Player()
         player2 = Player()
         self.players = [player1, player2]

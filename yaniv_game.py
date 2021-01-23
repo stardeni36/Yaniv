@@ -16,9 +16,9 @@ class PackOfCards:
         if cards:  # not None
             self.cards = cards
         if is_shuffle:
-            self.shuffle_pack()
+            self.shuffle()
 
-    def shuffle_pack(self):
+    def shuffle(self):
         shuffle(self.cards)
 
     def __str__(self):
@@ -118,7 +118,7 @@ class Game:
     def repopulate_deck(self):
         card_inds_to_move = range(1, len(self.stack.cards))  # TODO: make sure the indices are ok
         self.stack.distributed_by_indices(self.deck, card_inds_to_move)
-        self.deck.shuffle_pack()
+        self.deck.shuffle()
 
     def draw(self, player):
         response = player.choice_take_card()

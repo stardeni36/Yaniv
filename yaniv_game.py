@@ -3,6 +3,7 @@ from operator import attrgetter
 from card import ALL_CARDS
 
 
+STARTING_HAND_SIZE = 7
 AMOUNT_ALL = None
 DECK = 0
 STACK = 1
@@ -21,7 +22,16 @@ class PackOfCards:
         shuffle(self.cards)
 
     def __str__(self):
-        return str([str(card) for card in self.cards])
+        nice = '---------' + '----'*len(self.cards)
+        nice += '\n'
+        nice += '| index | '
+        nice += ' | '.join(str(index) for index in range(len(self.cards)))
+        nice += ' | \n'
+        nice += '| card  | '
+        nice += ' | '.join([str(card) for card in self.cards])
+        nice += ' | \n'
+        nice += '---------' + '----'*len(self.cards)
+        return nice
 
     def distribute(self, destination, amount=AMOUNT_ALL):
         if amount == AMOUNT_ALL:
@@ -95,7 +105,7 @@ class Game:
         self.players = [player1, player2]
         
         for player in self.players:
-            self.deck.distribute(player.hand, 7)
+            self.deck.distribute(player.hand, STARTING_HAND_SIZE)
         self.deck.distribute(self.stack, 1)
 
     def run(self):

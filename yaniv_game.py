@@ -95,7 +95,7 @@ class Player:
             suits_of_cards_to_check = [card.suit for card in cards_to_check]
             if len(set(suits_of_cards_to_check)) == 1:
                 sorted_values = sorted(values_of_cards_to_check)
-                should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]))
+                should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]+1))
                 if sorted_values == should_be_equal_to:
                     return True
                 else:
@@ -151,10 +151,10 @@ class Player:
 
     def choice_take_card(self):
         while True:
-            response = input('Take a card from the deck or the stack? ')
-            if response == 'deck':
+            response = input('Take a card from the (d)eck or the (s)tack? ')
+            if response == 'd':
                 return DECK
-            if response == 'stack':
+            if response == 's':
                 return STACK
     
     def is_assaf(self):
@@ -221,7 +221,7 @@ class Game:
                 break
             if player == yaniv:
                 yaniv_score = score
-            elif player.is_assaf()
+            elif player.is_assaf():
                 print('%s called Assaf!' % player.name)
                 return player
         return yaniv

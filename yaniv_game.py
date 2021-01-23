@@ -1,5 +1,5 @@
 from random import shuffle
-from operator import attrgetter
+from operator import itemgetter, attrgetter
 from card import ALL_CARDS
 
 
@@ -164,11 +164,22 @@ class Player:
 
     def choice_take_card(self):
         while True:
-            response = input('Take a card from the deck or the stack? ')
-            if response == 'deck':
+            response = input('Take a card from the (d)eck or the (s)tack? ')
+            if response == 'd':
                 return DECK
-            if response == 'stack':
+            if response == 's':
                 return STACK
+    
+    def is_assaf(self):
+        valid_input = False
+        while not valid_input:
+            answer = input("Call (a)ssaf or (n)o?")
+            if answer == 'a' or answer == 'n':
+                valid_input = True
+
+        if answer == 'a':
+            return True
+        return False
 
 
 class Game:
@@ -189,8 +200,13 @@ class Game:
         gameover = False
         while not gameover:
             for player in self.players:
-                self.turn(player)
-            pass
+                if self.turn(player):
+                    print('%s called Yaniv!' % player.name)
+                    winner = self.finish_game(yaniv=player)
+                    print('%s is the winner!' % winner.name)
+                    gameover=True
+                    break
+
 
     def repopulate_deck(self):
         card_inds_to_move = range(1, len(self.stack.cards))  # TODO: make sure the indices are ok
@@ -209,24 +225,27 @@ class Game:
             raise InputError('Invalid draw response!')
         return response
 
-    def finish_game(self, curr_player):
-        sum_to_compare_to = curr_player.hand.sum()
-        # check other players packs
-        for player in self.players:
-            if player != curr_player: # exclude current one
-                if player.hand.sum() < sum_to_compare_to:
-                    return CALL_ASSAF
+    def finish_game(self, yaniv):
+        scores = [(player, player.hand.sum()) for player in self.players]
+        scores.sort(key=itemgetter[1])
+        yaniv_score = None
+        for player, score in scores:
+            if yaniv_score is not None and score > yaniv_score:
+                break
+            if player == yaniv:
+                yaniv_score = score
+            elif player.is_assaf():
+                print('%s called Assaf!' % player.name)
+                return player
+        return yaniv
 
     def turn(self, player):
         print("%s's turn" % player.name)
-
         action = player.action(self.stack.cards[0])
+        
         if action == CALL_YANIV:
-            print('%s called Yaniv!' % player.name)
-            if player.check_yaniv():
-                self.finish_game(player)
-            else:
-                raise InputError('Invalid Yaniv call!')
+            return True
+            
         elif type(action) == list:
             batch = player.hand.discard_batch(action)
             response = self.draw(player)
@@ -235,8 +254,11 @@ class Game:
             batch_nice = ' , '.join([str(card) for card in batch])
             print('%s dropped %s ,' % (player.name, batch_nice))
             print('and took a card from the %s.' % response)
+
         else:
             raise InputError('Invalid action!')
+        
+        return False
 
 
 if __name__ == '__main__':

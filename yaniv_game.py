@@ -5,10 +5,15 @@ from card import ALL_CARDS
 
 STARTING_HAND_SIZE = 7
 AMOUNT_ALL = None
-DECK = 0
-STACK = 1
+DECK = 'deck'
+STACK = 'stack'
 CALL_YANIV = 0
 CALL_ASSAF = 1
+
+
+class InputError(Exception):
+    pass
+
 
 class PackOfCards:
     def __init__(self, cards=None, is_shuffle=False):
@@ -50,19 +55,20 @@ class PackOfCards:
         batch = self.discard_batch(indices)
         destination.cards = batch + destination.cards
 
-    def sum_of_card_values(self):
+    def sum(self):
         sum_of_values = sum([min(card.value, 10) for card in self.cards])
         return sum_of_values
 
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, name):
         self.hand = PackOfCards()
+        self.name = name
 
     def check_yaniv(self):
-        sum_of_hand = self.hand.sum_of_card_values()
-        if sum_of_hand <= 7:
+        sum = self.hand.sum()
+        if sum <= 7:
             return True
         else:
             return False
@@ -72,7 +78,7 @@ class Player:
         # Start by sorting hand (for convenience)
         self.hand.cards.sort(key=attrgetter('value'))
 
-        print("These are your cards:")
+        print("This is your hand:")
         print(self.hand)
         print("The top of the stack is: %s" % stack_top)
 
@@ -119,8 +125,8 @@ class Game:
         self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
         self.stack = PackOfCards()
 
-        player1 = Player()
-        player2 = Player()
+        player1 = Player("Stav")
+        player2 = Player("Eyal")
         self.players = [player1, player2]
         
         for player in self.players:
@@ -145,32 +151,43 @@ class Game:
             self.deck.distribute(player.hand, 1)
             if len(self.deck.cards) == 0:
                 self.repopulate_deck()
-
         elif response == STACK:
             self.stack.distribute(player.hand, 1)
+        else:
+            raise InputError('Invalid draw response!')
+        return response
 
     def finish_game(self, curr_player):
-        sum_to_compare_to = curr_player.hand.sum_of_card_values()
+        sum_to_compare_to = curr_player.hand.sum()
         # check other players packs
         for player in self.players:
             if player != curr_player: # exclude current one
-                if  player.hand.sum_of_card_values() < sum_to_compare_to:
+                if player.hand.sum() < sum_to_compare_to:
                     return CALL_ASSAF
 
     def turn(self, player):
+        print("%s's turn" % player.name)
+
         action = player.action(self.stack.cards[0])
         if action == CALL_YANIV:
+            print('%s called Yaniv!' % player.name)
             if player.check_yaniv():
                 self.finish_game(player)
             else:
-                print('Yaniv call not valid!')
-        else:
+                raise InputError('Invalid Yaniv call!')
+        elif type(action) == list:
             batch = player.hand.discard_batch(action)
+            response = self.draw(player)
+            self.stack.cards = batch + self.stack.cards
 
-        self.draw(player)
-        self.stack = batch + self.stack
+            batch_nice = ' , '.join([str(card) for card in batch])
+            print('%s dropped %s ,' % (player.name, batch_nice))
+            print('and took a card from the %s.' % response)
+        else:
+            raise InputError('Invalid action!')
 
 
-game = Game()
-game.run()
+if __name__ == '__main__':
+    game = Game()
+    game.run()
 

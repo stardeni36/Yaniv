@@ -63,6 +63,27 @@ class Player:
         else:
             return False
 
+    def validate_indices_to_drop(self, indices):
+        is_in_range = lambda x: x in range(len(self.hand.cards))
+        if False in [is_in_range(index) for index in indices]:
+            return False
+        # if multiple: check both cases
+        if len(indices) > 1:
+            cards_to_check = [self.hand.cards[ind] for ind in indices]
+            # check if they have the same value
+            values_of_cards_to_check = [card.value for card in cards_to_check]
+            if len(set(values_of_cards_to_check)) == 1:
+                return True
+            # check if having the same suit and create a range
+            suits_of_cards_to_check = [card.suit for card in cards_to_check]
+            if len(set(suits_of_cards_to_check)) == 1:
+                sorted_values = sorted(values_of_cards_to_check)
+                should_be_equal_to = list(range(sorted_values[0], sorted_values[-1]))
+                if sorted_values == should_be_equal_to:
+                    return True
+            else:
+                return False
+
     def action(self, stack_top):
 
         # Start by sorting hand (for convenience)
@@ -91,11 +112,18 @@ class Player:
             answer = input("Choose card indices to play, separated by commas: ")
             try:
                 indices = [int(val.strip()) for val in answer.split(',')]
-                is_valid = lambda x: x in range(len(self.hand.cards))
-                if False not in [is_valid(index) for index in indices]:
+                if self.validate_indices_to_drop(indices):
                     valid_input = True
             except ValueError:
                 pass  # Try again
+
+            # try:
+            #     indices = [int(val.strip()) for val in answer.split(',')]
+            #     is_valid = lambda x: x in range(len(self.hand.cards))
+            #     if False not in [is_valid(index) for index in indices]:
+            #         valid_input = True
+            # except ValueError:
+            #
         
         return indices
 

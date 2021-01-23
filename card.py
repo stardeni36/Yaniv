@@ -1,15 +1,10 @@
+from config import *
+
 HEART_GRAPHIC = ['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂽', '🂾']
 LEAF_GRAPHIC = ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂭', '🂮']
 DIAMOND_GRAPHIC = ['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃍', '🃎']
 CLUBS_GRAPHIC = ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃝', '🃞']
 JOKER_GRAPHIC = ['🃟', '🃟']
-
-SUIT_HEART = 0
-SUIT_LEAF = 1
-SUIT_DIAMOND = 2
-SUIT_CLUBS = 3
-SUIT_JOKER = 4
-VALUE_JOKER = 0
 
 class Card:
     def __init__(self, value, suit, graphic):

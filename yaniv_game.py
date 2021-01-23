@@ -22,41 +22,48 @@ class PackOfCards:
         self.cards = self.cards[amount:]
         destination.cards += batch
 
+    
+    def distributed_by_indices(self, destination, indices):
+        pass
+
 
 class Player:
     def __init__(self):
         self.pack = PackOfCards()
 
-    def action(self):
+    def action(self, stack_top):
         print("These are your cards:")
         print(self.pack)
+        print("The top of the stack is: %s" % stack_top)
 
+        # Ask first action and validate input
         valid_input = False
-            while not valid_input:
-            answer = int(input("Choose your action - (p)lay cards or call (y)aniv: "))
+        while not valid_input:
+            answer = input("Choose your action - (p)lay cards or call (y)aniv: ")
             if answer == 'p' or answer == 'y':
                 valid_input = True
 
-        if answer == 'y'
+        if answer == 'y':
             return CALL_YANIV
         
+        # Ask second action and validate input
         valid_input = False
         while not valid_input:
-            answer = int(input("Choose card indices to play, separated by commas: "))
-            splitted = answer.split(',')
-            try
-            if False not in [val.isnumeric() for val in splitted]:
-                valid_input = True
+            answer = input("Choose card indices to play, separated by commas: ")
+            try:
+                indices = [int(val.strip()) for val in answer.split(',')]
+                is_valid = lambda x: x in range(len(self.pack.cards))
+                if False not in [is_valid(index) for index in indices]:
+                    valid_input = True
+            except ValueError:
+                pass  # Try again
         
-        indices = [int(splitted)]
-        dropped_card = self.player_cards.pop(index)
-        print("dropped cards: ", dropped_card)
-        print("these are your cards:")
-        print(self.player_cards)
+        return indices
+
 
     def choice_take_card(self):
         while True:
-            response = input('take a card from the deck or the stack? ')
+            response = input('Take a card from the deck or the stack? ')
             if response == 'deck':
                 return DECK
             if response == 'stack':
@@ -65,10 +72,6 @@ class Player:
 
 
 class Game:
-    # TODO in init:
-    # call PackOfCards and its permutation method
-    # call its method for giving 7 cards to each player
-    # the rest will be the kupa
 
     def __init__(self):
         self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
@@ -97,7 +100,8 @@ class Game:
             self.stack.distribute(player.pack, 1)
 
     def turn(self, player):
-        player.action(self.stack[0])
+        action = player.action(self.stack.cards[0])
+
         self.draw(player)
         pass
 

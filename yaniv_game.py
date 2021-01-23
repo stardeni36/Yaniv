@@ -1,5 +1,7 @@
 from random import shuffle
+from operator import attrgetter
 from card import ALL_CARDS
+
 
 AMOUNT_ALL = None
 DECK = 0
@@ -15,25 +17,34 @@ class PackOfCards:
         if is_shuffle:
             shuffle(self.cards)
 
+    def __str__(self):
+        return str([str(card) for card in self.cards])
+
     def distribute(self, destination, amount=AMOUNT_ALL):
         if amount == AMOUNT_ALL:
             amount = len(self.cards)
         batch = self.cards[:amount]
         self.cards = self.cards[amount:]
-        destination.cards += batch
+        destination.cards = batch + destination.cards
 
-    
-    def distributed_by_indices(self, destination, indices):
-        pass
+    def distribute_by_indices(self, destination, indices):
+        batch = [self.cards[index] for index in indices]
+        for card in batch:
+            self.cards.remove(card)
+        destination.cards = batch + destination.cards
 
 
 class Player:
     def __init__(self):
-        self.pack = PackOfCards()
+        self.hand = PackOfCards()
 
     def action(self, stack_top):
+
+        # Start by sorting hand (for convenience)
+        self.hand.cards.sort(key=attrgetter('value'))
+
         print("These are your cards:")
-        print(self.pack)
+        print(self.hand)
         print("The top of the stack is: %s" % stack_top)
 
         # Ask first action and validate input
@@ -52,7 +63,7 @@ class Player:
             answer = input("Choose card indices to play, separated by commas: ")
             try:
                 indices = [int(val.strip()) for val in answer.split(',')]
-                is_valid = lambda x: x in range(len(self.pack.cards))
+                is_valid = lambda x: x in range(len(self.hand.cards))
                 if False not in [is_valid(index) for index in indices]:
                     valid_input = True
             except ValueError:
@@ -82,7 +93,7 @@ class Game:
         self.players = [player1, player2]
         
         for player in self.players:
-            self.deck.distribute(player.pack, 7)
+            self.deck.distribute(player.hand, 7)
         self.deck.distribute(self.stack, 1)
 
     def run(self):
@@ -95,9 +106,10 @@ class Game:
     def draw(self, player):
         response = player.choice_take_card()
         if response == DECK:
-            self.deck.distribute(player.pack, 1)
+            self.deck.distribute(player.hand, 1)
+
         elif response == STACK:
-            self.stack.distribute(player.pack, 1)
+            self.stack.distribute(player.hand, 1)
 
     def turn(self, player):
         action = player.action(self.stack.cards[0])

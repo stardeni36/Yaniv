@@ -15,6 +15,9 @@ class Card:
         self.value = value
         self.suit = suit
         self.graphic = graphic
+
+    def __str__(self):
+        return self.graphic
     
 HEART_CARDS =   [Card(value, SUIT_HEART, graphic) \
                 for value, graphic in enumerate(HEART_GRAPHIC, 1)]

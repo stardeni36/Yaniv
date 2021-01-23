@@ -13,7 +13,10 @@ class PackOfCards:
         if cards:  # not None
             self.cards = cards
         if is_shuffle:
-            shuffle(self.cards)
+            self.shuffle_pack()
+
+    def shuffle_pack(self):
+        shuffle(self.cards)
 
     def distribute(self, destination, amount=AMOUNT_ALL):
         if amount == AMOUNT_ALL:
@@ -22,7 +25,6 @@ class PackOfCards:
         self.cards = self.cards[amount:]
         destination.cards += batch
 
-    
     def distributed_by_indices(self, destination, indices):
         pass
 
@@ -60,7 +62,6 @@ class Player:
         
         return indices
 
-
     def choice_take_card(self):
         while True:
             response = input('Take a card from the deck or the stack? ')
@@ -92,17 +93,41 @@ class Game:
                 self.turn(player)
             pass
 
+    def repopulate_deck(self):
+        card_inds_to_move = range(1, len(self.stack.cards))  # TODO: make sure the indices are ok
+        self.stack.distributed_by_indices(self.deck, card_inds_to_move)
+        self.deck.shuffle_pack()
+
     def draw(self, player):
         response = player.choice_take_card()
         if response == DECK:
             self.deck.distribute(player.pack, 1)
+            if len(self.deck.cards) == 0:
+                self.repopulate_deck()
+
         elif response == STACK:
             self.stack.distribute(player.pack, 1)
 
+    def finish_game(self):
+        # check other players packs
+        for player in self.players: # exclude current one
+            sum([card.value for card in player.pack.cards])
+
+    def check_yaniv(self, player):
+        if sum([card.value for card in player.pack.cards]) <= 7:
+            return True
+        else:
+            return False
+
     def turn(self, player):
         action = player.action(self.stack.cards[0])
+        if action == CALL_YANIV:
+            if self.check_yaniv(player):
+                self.finish_game()
 
         self.draw(player)
+
+
         pass
 
 

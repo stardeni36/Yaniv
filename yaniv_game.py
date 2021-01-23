@@ -13,12 +13,12 @@ AMOUNT_ALL = None
 class PackOfCards:
     def __init__(self, cards=None, is_shuffle=False):
         self.cards = []
-        if cards!=None:
+        if cards:  # not None
             self.cards = cards
         if is_shuffle:
             shuffle(self.cards)
 
-    def distribute(self, amount=AMOUNT_ALL, destination):
+    def distribute(self, destination, amount=AMOUNT_ALL):
         if amount == AMOUNT_ALL:
             amount = len(self.cards)
         batch = self.cards[:amount]
@@ -53,22 +53,36 @@ class Game:
     # the rest will be the kupa
 
     def __init__(self):
-        deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
+        self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
+        self.stack = PackOfCards()
         
         player1 = Player()
         player2 = Player()
         self.players = [player1, player2]
         
-        for player in players:
-            deck.distribute(7, player.pack)
+        for player in self.players:
+            self.deck.distribute(player.pack, 7)
+        self.deck.distribute(self.stack, 1)
 
     def run(self):
         gameover = False
         while not gameover:
+            for player in self.players:
+                self.turn(player)
             pass
 
+    def draw(self, player):
+        response = input('take a card from the deck or the stack?')
+        if response == 'deck':
+            pass
+        elif response == 'stack':
+            self.stack.distribute(player.pack, 1)
+
     def turn(self, player):
+        # TODO: drop cards
+        self.draw(player)
         pass
+
 
 game = Game()
 game.run()

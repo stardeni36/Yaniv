@@ -1,8 +1,9 @@
 from operator import itemgetter, attrgetter
 from config import *
-from card import ALL_CARDS, VALUE_JOKER
+from card import ALL_CARDS
 from packofcards import PackOfCards
 from player import Player
+from greedy_player import GreedyPlayer
 
 
 class Game:
@@ -12,7 +13,8 @@ class Game:
         self.stack = PackOfCards()
 
         player1 = Player("Stav")
-        player2 = Player("Eyal")
+        # player2 = Player("Eyal")
+        player2 = GreedyPlayer("greedy")
         self.players = [player1, player2]
         
         for player in self.players:

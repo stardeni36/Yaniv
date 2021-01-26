@@ -4,7 +4,9 @@ from config import *
 from card import ALL_CARDS
 from packofcards import PackOfCards
 from player import Player
-from greedy_player import GreedyPlayer
+from playerspool import PlayersPool
+from localcontroller import LocalController
+from botcontroller import BotController
 
 
 class Game:
@@ -13,26 +15,28 @@ class Game:
         self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
         self.stack = PackOfCards()
 
-        player1 = Player("Stav")
-        # player2 = Player("Eyal")
-        player2 = GreedyPlayer("Bot")
-        self.players = [player1, player2]
+        player1 = Player("Stav", LocalController())
+        player2 = Player("Eyal", BotController())
+        self.pool = PlayersPool()
+        self.pool.add(player1)
+        self.pool.add(player2)
         
-        for player in self.players:
+        for player in self.pool:
             self.deck.distribute(player.hand, STARTING_HAND_SIZE)
         self.deck.distribute(self.stack, 1)
 
     def run(self):
         gameover = False
         while not gameover:
-            for player in self.players:
+            for player in self.pool:
+                self.pool.set_current(player)
                 sleep(1)
                 if self.turn(player):
-                    print('%s called Yaniv!' % player.name)
+                    self.pool.publish_msg('%s called Yaniv!' % player.name, ALL)
                     winner, scores = self.finish_game(yaniv=player)
-                    print('The winner is %s!' % winner.name)
+                    self.pool.publish_msg('The winner is %s!' % winner.name, ALL)
                     for player, score in scores:
-                        print('%s \t %d' % (player.name, score))
+                        self.pool.publish_msg('%s \t %d' % (player.name, score), ALL)
                     gameover=True
                     break
 
@@ -55,7 +59,7 @@ class Game:
         return response, acquisition[0]
 
     def finish_game(self, yaniv):
-        scores = [(player, player.hand.sum()) for player in self.players]
+        scores = [(player, player.hand.sum()) for player in self.pool]
         scores.sort(key=itemgetter(1))
         yaniv_score = None
         for player, score in scores:
@@ -64,12 +68,12 @@ class Game:
             if player == yaniv:
                 yaniv_score = score
             elif player.is_assaf():
-                print('%s called Assaf!' % player.name)
+                self.pool.publish_msg('%s called Assaf!' % player.name, ALL)
                 return player, scores
         return yaniv, scores
 
     def turn(self, player):
-        print("%s's turn." % player.name)
+        self.pool.publish_msg("%s's turn." % player.name, ALL)
         action = player.action(self.stack.cards[0])
         
         if action == CALL_YANIV:
@@ -82,13 +86,12 @@ class Game:
             self.stack.cards = batch + self.stack.cards
 
             batch_nice = ' , '.join([str(card) for card in batch])
-            print()
-            print('%s dropped %s ,' % (player.name, batch_nice))
+            turn_summary = '\n%s dropped %s ,\n' % (player.name, batch_nice)
             if response == DECK:
-                print('and took a card from the deck.')
+                turn_summary += 'and took a card from the deck.\n'
             if response == STACK:
-                print('and took the card %s  from the stack.' % str(acquisition))
-            print()
+                turn_summary += 'and took the card %s  from the stack.\n' % str(acquisition)
+            self.pool.publish_msg(turn_summary, OTHERS)
 
         else:
             raise InputError('Invalid action!')

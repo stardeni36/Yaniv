@@ -1,11 +1,13 @@
 from operator import attrgetter
 from config import *
 from packofcards import PackOfCards
+from playercontroller import PlayerController
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, controller):
         self.hand = PackOfCards()
         self.name = name
+        self.controller = controller
 
     def check_yaniv(self):
         sum = self.hand.sum()
@@ -52,55 +54,33 @@ class Player:
         # Start by sorting hand (for convenience)
         self.hand.cards.sort(key=attrgetter('value'))
 
-        print("This is your hand:")
-        print(self.hand)
-        print('Total value: %d' % self.hand.sum())
-        print("The top of the stack is: %s ." % stack_top)
+        state_summary = "This is your hand:\n"
+        state_summary += str(self.hand) + '\n'
+        state_summary += 'Total value: %d\n' % self.hand.sum()
+        state_summary += "The top of the stack is: %s ." % stack_top
+        self.publish_msg(state_summary)
 
         is_yaniv_possible = self.check_yaniv()
 
         if is_yaniv_possible:
-            # Ask first action and validate input
-            valid_input = False
-            while not valid_input:
-                answer = input("Choose your action - (p)lay cards or call (y)aniv: ")
-                if answer == 'p' or answer == 'y':
-                    valid_input = True
-
-            if answer == 'y':
+            if self.controller.ask_yaniv():
                 return CALL_YANIV
         
-        # Ask second action and validate input
-        valid_input = False
-        while not valid_input:
-            answer = input("Choose card indices to play, separated by commas: ")
-            try:
-                indices = [int(val.strip()) for val in answer.split(',')]
-                if self.validate_indices_to_drop(indices):
-                    valid_input = True
-            except ValueError:
-                pass  # Try again
-        
+        valid_play = False
+        while not valid_play:
+            indices = self.controller.ask_play(self.hand.cards, stack_top)
+            valid_play = self.validate_indices_to_drop(indices)
         return indices
+        
 
     def choice_take_card(self):
-        while True:
-            response = input('Take a card from the (d)eck or the (s)tack? ')
-            if response == 'd':
-                return DECK
-            if response == 's':
-                return STACK
+        return self.controller.ask_draw()
     
     def is_assaf(self):
-        valid_input = False
-        while not valid_input:
-            answer = input("Call (a)ssaf or (n)o? ")
-            if answer == 'a' or answer == 'n':
-                valid_input = True
-    
-        if answer == 'a':
-            return True
-        return False
+        return self.controller.ask_assaf()
 
     def announce_acquisition(self, acquisition):
-        print('New card acquired: %s .' % acquisition)
+        self.publish_msg('New card acquired: %s .' % acquisition)
+
+    def publish_msg(self, msg):
+        self.controller.publish_msg(msg)

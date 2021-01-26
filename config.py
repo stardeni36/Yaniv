@@ -13,6 +13,9 @@ SUIT_DIAMOND = 2
 SUIT_CLUBS = 3
 SUIT_JOKER = 4
 VALUE_JOKER = 0
+ALL = 0
+CURRENT = 1
+OTHERS = 2
 
 class InputError(Exception):
     pass

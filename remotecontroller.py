@@ -1,5 +1,9 @@
+from playercontroller import PlayerController
 
-class PlayerController():
+class RemoteController(PlayerController):
+
+    def __init__(self, conn):
+        self.conn = conn
 
     def ask_yaniv(self):
         pass

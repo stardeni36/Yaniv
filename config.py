@@ -1,6 +1,11 @@
 
 # Configuration
 STARTING_HAND_SIZE = 7
+NUM_LOCAL_PLAYERS = 1
+NUM_BOT_PLAYERS = 3
+NUM_REMOTE_PLAYERS = 0
+SPECTATE = False  # Use when there are no local players
+BOT_NAMES = ['Cylon', 'R.O.B', 'Wall-E', 'R2D2', 'Bender Rodriguez', 'Roomba', 'The Terminator']
 
 # Enums
 DECK = 'deck'

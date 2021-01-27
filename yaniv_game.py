@@ -1,12 +1,12 @@
 from operator import itemgetter, attrgetter
 from time import sleep
+import random
 from config import *
 from card import ALL_CARDS
 from packofcards import PackOfCards
 from player import Player
 from playerspool import PlayersPool
-from localcontroller import LocalController
-from botcontroller import BotController
+from playerfactory import PlayerFactory
 
 
 class Game:
@@ -14,13 +14,13 @@ class Game:
     def __init__(self):
         self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
         self.stack = PackOfCards()
-
-        player1 = Player("Stav", LocalController())
-        player2 = Player("Eyal", BotController())
         self.pool = PlayersPool()
-        self.pool.add(player1)
-        self.pool.add(player2)
-        
+        for i in range(NUM_LOCAL_PLAYERS):
+            self.pool.add(PlayerFactory.generate_local_player(i+1))
+        for name in random.sample(BOT_NAMES, NUM_BOT_PLAYERS):
+            self.pool.add(PlayerFactory.generate_bot_player(name))
+        for i in range(NUM_REMOTE_PLAYERS):
+            self.pool.add(PlayerFactory.generate_remote_player())
         for player in self.pool:
             self.deck.distribute(player.hand, STARTING_HAND_SIZE)
         self.deck.distribute(self.stack, 1)
@@ -36,7 +36,7 @@ class Game:
                     winner, scores = self.finish_game(yaniv=player)
                     self.pool.publish_msg('The winner is %s!' % winner.name, ALL)
                     for player, score in scores:
-                        self.pool.publish_msg('%s \t %d' % (player.name, score), ALL)
+                        self.pool.publish_msg('{:<20} {:<3}'.format(player.name, score), ALL)
                     gameover=True
                     break
 
@@ -73,7 +73,7 @@ class Game:
         return yaniv, scores
 
     def turn(self, player):
-        self.pool.publish_msg("%s's turn." % player.name, ALL)
+        self.pool.publish_msg("\n%s's turn." % player.name, ALL)
         action = player.action(self.stack.cards[0])
         
         if action == CALL_YANIV:
@@ -86,11 +86,11 @@ class Game:
             self.stack.cards = batch + self.stack.cards
 
             batch_nice = ' , '.join([str(card) for card in batch])
-            turn_summary = '\n%s dropped %s ,\n' % (player.name, batch_nice)
+            turn_summary = '%s dropped %s ,\n' % (player.name, batch_nice)
             if response == DECK:
-                turn_summary += 'and took a card from the deck.\n'
+                turn_summary += 'and took a card from the deck.'
             if response == STACK:
-                turn_summary += 'and took the card %s  from the stack.\n' % str(acquisition)
+                turn_summary += 'and took the card %s  from the stack.' % str(acquisition)
             self.pool.publish_msg(turn_summary, OTHERS)
 
         else:

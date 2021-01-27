@@ -14,6 +14,18 @@ class LocalController(PlayerController):
         if answer == 'y':
             return True
 
+    def ask_assaf(self):
+        
+        valid_input = False
+        while not valid_input:
+            answer = input("Call (a)ssaf or (n)o? ")
+            if answer == 'a' or answer == 'n':
+                valid_input = True
+    
+        if answer == 'a':
+            return True
+        return False
+
     def ask_play(self, cards, stack_top):
 
         valid_input = False
@@ -36,18 +48,6 @@ class LocalController(PlayerController):
                 return DECK
             if answer == 's':
                 return STACK
-
-    def ask_assaf(self):
-        
-        valid_input = False
-        while not valid_input:
-            answer = input("Call (a)ssaf or (n)o? ")
-            if answer == 'a' or answer == 'n':
-                valid_input = True
-    
-        if answer == 'a':
-            return True
-        return False
 
     def publish_msg(self, msg):
         print(msg)

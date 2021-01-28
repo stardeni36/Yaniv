@@ -19,10 +19,9 @@ class PlayerFactory():
         print('Bot %s has joined.' % name)
         return Player(name, BotController())
     
-    def generate_remote_player():
-        # Wait for connection
-        conn = ''  # From remote
-        name = ''  # From remote
-        print('Player %s has joined remotely.' % name)
+    def generate_remote_player(socket):
+        conn, addr = socket.accept()
+        name = conn.recv(256).decode()
+        print('Player %s has joined remotely from %s.' % (name, addr))
         return Player(name, RemoteController(conn))
     

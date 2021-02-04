@@ -12,28 +12,25 @@ from playerfactory import PlayerFactory
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, s=None):
         self.deck = PackOfCards(cards=ALL_CARDS, is_shuffle=True)
         self.stack = PackOfCards()
         self.pool = PlayersPool()
-
-        if IS_SERVER is True:
-            self.socket = socket.socket()
-            self.socket.bind((HOST, PORT))
-            self.socket.listen(NUM_REMOTE_PLAYERS)	
+        self.socket = s
 
         for i in range(NUM_LOCAL_PLAYERS):
             self.pool.add(PlayerFactory.generate_local_player(i+1))
         for name in random.sample(BOT_NAMES, NUM_BOT_PLAYERS):
             self.pool.add(PlayerFactory.generate_bot_player(name))
-        for i in range(NUM_REMOTE_PLAYERS):
-            self.pool.add(PlayerFactory.generate_remote_player(self.socket))
+        
+        if IS_SERVER is True:
+            self.socket.listen(NUM_REMOTE_PLAYERS)
+            for i in range(NUM_REMOTE_PLAYERS):
+                self.pool.add(PlayerFactory.generate_remote_player(self.socket))
+        
         for player in self.pool:
             self.deck.distribute(player.hand, STARTING_HAND_SIZE)
         self.deck.distribute(self.stack, 1)
-
-    def __del__(self):
-        self.socket.close()
 
     def run(self):
         gameover = False
@@ -110,6 +107,17 @@ class Game:
 
 
 if __name__ == '__main__':
-    game = Game()
-    game.run()
-
+    s = None
+    if IS_SERVER is True:
+            s = socket.socket()
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((HOST, PORT))
+    try:
+        game = Game(s)
+        game.run()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if IS_SERVER is True:
+            print('Closing server')
+            s.close()
